@@ -12,6 +12,7 @@ import websocket
 import algorithm
 import msd_converter
 from graph_fast import FastGraph
+from native_7k import calculate_native_7k_sr
 
 
 def resource_path(relative_path):
@@ -728,13 +729,22 @@ def calculation_loop():
 
             try:
                 hitobjects = msd_converter.parse_hitobjects(mp, mod)
-                etterna_rows = msd_converter.osu_to_etterna_rows(hitobjects, keycount=keycount)
-                msd_result = msd_converter.calculate_msd(etterna_rows)
-                print("\n[MSD Skillsets]")
+                
+                # --- MESIN BARU: NATIVE 7K ---
+                if keycount == 7:
+                    # Langsung telan dictionary dari native_7k!
+                    msd_result = calculate_native_7k_sr(hitobjects)
+                    
+                # --- MESIN LAMA: 4K TETAP PAKAI MSD ---
+                else:
+                    etterna_rows = msd_converter.osu_to_etterna_rows(hitobjects, keycount=keycount)
+                    msd_result = msd_converter.calculate_msd(etterna_rows)
+                    
+                print("\n[Skillsets]")
                 for k, v in msd_result.items():
                     print(f"{k:<10}: {v:.2f}")
             except Exception as msd_e:
-                print(f"[MSD] Error calculating MSD, skipping: {msd_e}")
+                print(f"[MSD] Error calculating, skipping: {msd_e}")
                 msd_result = None
 
             with lock:
